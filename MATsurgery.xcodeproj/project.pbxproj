@@ -15,6 +15,7 @@
 		FB12B9EE1E4E36F400637A20 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9EC1E4E36F400637A20 /* Main.storyboard */; };
 		FB12B9F01E4E36F400637A20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9EF1E4E36F400637A20 /* Assets.xcassets */; };
 		FB12B9F31E4E36F400637A20 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9F11E4E36F400637A20 /* LaunchScreen.storyboard */; };
+		FB71576E1E6A295200B69407 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB71576D1E6A295200B69407 /* GameOverScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		FB12B9EF1E4E36F400637A20 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FB12B9F21E4E36F400637A20 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FB12B9F41E4E36F400637A20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FB71576D1E6A295200B69407 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				FB12B9E41E4E36F400637A20 /* GameScene.sks */,
 				FB12B9E61E4E36F400637A20 /* Actions.sks */,
 				FB12B9E81E4E36F400637A20 /* GameScene.swift */,
+				FB71576D1E6A295200B69407 /* GameOverScene.swift */,
 				FB12B9EA1E4E36F400637A20 /* GameViewController.swift */,
 				FB12B9EC1E4E36F400637A20 /* Main.storyboard */,
 				FB12B9EF1E4E36F400637A20 /* Assets.xcassets */,
@@ -151,6 +154,7 @@
 			files = (
 				FB12B9E91E4E36F400637A20 /* GameScene.swift in Sources */,
 				FB12B9EB1E4E36F400637A20 /* GameViewController.swift in Sources */,
+				FB71576E1E6A295200B69407 /* GameOverScene.swift in Sources */,
 				FB12B9E31E4E36F400637A20 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -273,6 +277,7 @@
 		FB12B9F81E4E36F400637A20 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 54GBE4JZ85;
@@ -287,6 +292,7 @@
 		FB12B9F91E4E36F400637A20 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 54GBE4JZ85;
