@@ -21,6 +21,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
     var isFingerOnOrgan = false
+    var gameOngoing = true
     var touchLocation = CGPoint()
     var organList = ["heart", "kidney", "liver", "brain", "lung"]
     var random = Int()
@@ -109,6 +110,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func killOrgan(organ: SKSpriteNode) {
+        isFingerOnOrgan = false
+        gameOngoing = false
         //end current game - show score/ restart button
         run(SKAction.sequence([
             SKAction.run() {
@@ -144,47 +147,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        touchLocation = touch!.location(in:self)
-        touchedOrgans = self.nodes(at: touchLocation)
-        if touchedOrgans.count > 0 {
-            numOrgans = touchedOrgans.count
-            if touchedOrgans[numOrgans - 1].name == "background" {
-                print(touchedOrgans.popLast()?.name ?? "none")
+        if gameOngoing {
+            let touch = touches.first
+            touchLocation = touch!.location(in:self)
+            touchedOrgans = self.nodes(at: touchLocation)
+            if touchedOrgans.count > 0 {
+                numOrgans = touchedOrgans.count
+                if touchedOrgans[numOrgans - 1].name == "background" {
+                    print(touchedOrgans.popLast()?.name ?? "none")
+                }
             }
-        }
-        if touchedOrgans.count > 0 {
-            numOrgans = touchedOrgans.count
-            if touchedOrgans[numOrgans - 1].name == "hand" {
-                print(touchedOrgans.popLast()?.name ?? "none")
+            if touchedOrgans.count > 0 {
+                numOrgans = touchedOrgans.count
+                if touchedOrgans[numOrgans - 1].name == "hand" {
+                    print(touchedOrgans.popLast()?.name ?? "none")
+                }
             }
-        }
-        if touchedOrgans.count > 0 {
-            numOrgans = touchedOrgans.count
-            if touchedOrgans[numOrgans - 1].name == "Organ" {
-                isFingerOnOrgan = true
-                touchedOrgans[numOrgans-1].removeAction(forKey: "rotateOrgan")
+            if touchedOrgans.count > 0 {
+                numOrgans = touchedOrgans.count
+                if touchedOrgans[numOrgans - 1].name == "Organ" {
+                    isFingerOnOrgan = true
+                    touchedOrgans[numOrgans-1].removeAction(forKey: "rotateOrgan")
+                }
             }
-        }
         
-        /*if let body = physicsWorld.body(at: touchLocation) {
-            if body.node!.name == "organ" {
+            /*if let body = physicsWorld.body(at: touchLocation) {
+                if body.node!.name == "organ" {
                     print("Began touch on organ")
-                isFingerOnOrgan = true
-            }
+                    isFingerOnOrgan = true
+                }
         
-        }*/
+             }*/
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if isFingerOnOrgan {
+        if isFingerOnOrgan && gameOngoing {
             let touch = touches.first
             touchLocation = touch!.location(in: self)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if isFingerOnOrgan {
+        if isFingerOnOrgan && gameOngoing {
             isFingerOnOrgan = false
             touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = true
         }
@@ -200,43 +205,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     override func update(_ currentTime: CFTimeInterval) {
-        nodesToRemove = self.nodes(at: deleteLocation)
-        if nodesToRemove.count > 0 {
-            for node in nodesToRemove {
-                if node.name == "Organ" {
-                    node.removeFromParent()
-                    score += 1
-                    print("score: " + String(score))
-                    scoreLabel.text = String(score)
+        if gameOngoing {
+            nodesToRemove = self.nodes(at: deleteLocation)
+            if nodesToRemove.count > 0 {
+                for node in nodesToRemove {
+                    if node.name == "Organ" {
+                        node.removeFromParent()
+                        score += 1
+                        print("score: " + String(score))
+                        scoreLabel.text = String(score)
+                    }
                 }
             }
-        }
-        // Called before each frame is rendered
-        if isFingerOnOrgan {
-            if gravityOn
-            {
-                touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = false
-                touchedOrgans[numOrgans - 1].physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-                gravityOn = false
+            // Called before each frame is rendered
+            if isFingerOnOrgan {
+                if gravityOn
+                {
+                    touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = false
+                    touchedOrgans[numOrgans - 1].physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+                    gravityOn = false
+                    /*for organ in touchedOrgans {
+                        organ.physicsBody?.affectedByGravity = false
+                    }*/
+                    //childNode(withName: "organ")!.physicsBody?.affectedByGravity = false
+                    //childNode(withName: "organ")!.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+                }
+                let dt:CGFloat = 3.6/60.0
+                let distance = CGVector(dx: touchLocation.x-touchedOrgans[numOrgans-1].position.x, dy: touchLocation.y-touchedOrgans[numOrgans-1].position.y)
+                let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
+            
+                touchedOrgans[numOrgans - 1].position = CGPoint(x: touchLocation.x, y: touchLocation.y)
+            
+                touchedOrgans[numOrgans - 1].physicsBody?.velocity = velocity
+            
                 /*for organ in touchedOrgans {
-                    organ.physicsBody?.affectedByGravity = false
+                    organ.position = CGPoint(x: touchLocation.x, y: touchLocation.y)
                 }*/
-                //childNode(withName: "organ")!.physicsBody?.affectedByGravity = false
-                //childNode(withName: "organ")!.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+                //let organ = childNode(withName: "organ") as! SKSpriteNode
+                //organ.position = CGPoint(x: touchLocation.x, y: touchLocation.y)
             }
-            let dt:CGFloat = 3.6/60.0
-            let distance = CGVector(dx: touchLocation.x-touchedOrgans[numOrgans-1].position.x, dy: touchLocation.y-touchedOrgans[numOrgans-1].position.y)
-            let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
-            
-            touchedOrgans[numOrgans - 1].position = CGPoint(x: touchLocation.x, y: touchLocation.y)
-            
-            touchedOrgans[numOrgans - 1].physicsBody?.velocity = velocity
-            
-            /*for organ in touchedOrgans {
-                organ.position = CGPoint(x: touchLocation.x, y: touchLocation.y)
-            }*/
-            //let organ = childNode(withName: "organ") as! SKSpriteNode
-            //organ.position = CGPoint(x: touchLocation.x, y: touchLocation.y)
         }
     }
 }
