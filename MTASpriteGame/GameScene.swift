@@ -15,7 +15,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         static let None     : UInt32 = 0
         static let All      : UInt32 = UInt32.max
         static let Edge     : UInt32 = 0b1
-        static let Organ     : UInt32 = 0b10
+        static let Hand     : UInt32 = 0b10
+        static let Organ    : UInt32 = 0b100
     }
     
     private var label : SKLabelNode?
@@ -44,8 +45,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.zPosition = 1
         addChild(scoreLabel)
         
+        hand.name = "Hand"
         hand.position = CGPoint(x: 501.564, y: 289.835)
         hand.size = CGSize(width: 132.871, height: 60.331)
+        hand.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 132.871, height: 60.331))
+        hand.physicsBody?.categoryBitMask = PhysicsCategory.Hand
+        hand.physicsBody?.contactTestBitMask = PhysicsCategory.Organ
+        hand.physicsBody?.collisionBitMask = PhysicsCategory.None
+        hand.physicsBody?.affectedByGravity = false
         addChild(hand)
         
         score = 0
@@ -67,7 +74,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             newOrgan.position = CGPoint(x: -20, y: self.size.height/2+20)
             newOrgan.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(radius))
             newOrgan.physicsBody?.categoryBitMask = PhysicsCategory.Organ
-            newOrgan.physicsBody?.contactTestBitMask = PhysicsCategory.Edge
+            newOrgan.physicsBody?.contactTestBitMask = PhysicsCategory.Edge | PhysicsCategory.Hand
             newOrgan.physicsBody?.collisionBitMask = PhysicsCategory.None
             newOrgan.physicsBody?.usesPreciseCollisionDetection = true
             newOrgan.physicsBody?.friction = 0.05
@@ -101,40 +108,78 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             secondBody = contact.bodyA
         }
         
-        if((firstBody.categoryBitMask & PhysicsCategory.Edge != 0) &&
+        if((firstBody.categoryBitMask & PhysicsCategory.Hand != 0) &&
             (secondBody.categoryBitMask & PhysicsCategory.Organ != 0)) {
-            if let organ = secondBody.node as? SKSpriteNode {
-                killOrgan(organ: organ)
+            if  let possibleHand = firstBody.node as? SKSpriteNode,
+                let organToSave = secondBody.node as? SKSpriteNode {
+                saveOrgan(possibleHand: possibleHand, organ: organToSave)
             }
         }
+        
+        if((firstBody.categoryBitMask & PhysicsCategory.Edge != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Organ != 0)) {
+            if let organToKill = secondBody.node as? SKSpriteNode {
+                killOrgan(organ: organToKill)
+            }
+        }
+        
+    }
+    
+    func saveOrgan(possibleHand: SKSpriteNode, organ: SKSpriteNode) {
+        
+        if possibleHand.name == "Hand", organ.name == "Organ" {
+            isFingerOnOrgan = false
+            organ.name = "DeliveredOrgan"
+            run(SKAction.sequence([
+                SKAction.run() {
+                    organ.position = CGPoint(x: 511.564, y: 270.835)
+                    organ.zPosition = 1
+                    organ.physicsBody?.affectedByGravity = false
+                    organ.physicsBody?.angularDamping = 0
+                    organ.physicsBody?.velocity = CGVector(dx: 150, dy: 0)
+                    possibleHand.physicsBody?.velocity = CGVector(dx: 150, dy: 0)
+                    self.score += 1
+                    print("score: " + String(self.score))
+                    self.scoreLabel.text = String(self.score)
+                },
+                SKAction.wait(forDuration: 0.75),
+                SKAction.run() {
+                    organ.removeFromParent() // change the image to an explosion of blood instead
+                    possibleHand.physicsBody?.velocity = CGVector.zero
+                    possibleHand.position = CGPoint(x: 501.564, y: 289.835)
+                }
+            ]))
+        }
+        
     }
     
     func killOrgan(organ: SKSpriteNode) {
-        isFingerOnOrgan = false
-        gameOngoing = false
-        //end current game - show score/ restart button
-        run(SKAction.sequence([
-            SKAction.run() {
-                print("organ-edge contact")
-                self.removeAction(forKey: "spawnOrgans")
-                organ.texture = SKTexture(imageNamed: "blood")
-                organ.size = CGSize(width: 200, height: 200)
-                organ.removeAction(forKey: "rotateOrgan")
-                organ.physicsBody?.angularVelocity = 0
-                organ.physicsBody?.allowsRotation = false
-                organ.zRotation = 0
-                organ.physicsBody?.velocity = CGVector.zero
-                organ.physicsBody?.affectedByGravity = false
-            },
-            SKAction.wait(forDuration: 3.0),
-            SKAction.run() {
-                organ.removeFromParent() // change the image to an explosion of blood instead
-                let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
-                let gameOverScene = GameOverScene(size: self.size, score: self.score)
-                self.view?.presentScene(gameOverScene, transition: reveal)
-            }
+        if organ.name == "Organ" {
+            isFingerOnOrgan = false
+            gameOngoing = false
+            //end current game - show score/ restart button
+            run(SKAction.sequence([
+                SKAction.run() {
+                    print("organ-edge contact")
+                    self.removeAction(forKey: "spawnOrgans")
+                    organ.texture = SKTexture(imageNamed: "blood")
+                    organ.size = CGSize(width: 200, height: 200)
+                    organ.removeAction(forKey: "rotateOrgan")
+                    organ.physicsBody?.angularVelocity = 0
+                    organ.physicsBody?.allowsRotation = false
+                    organ.zRotation = 0
+                    organ.physicsBody?.velocity = CGVector.zero
+                    organ.physicsBody?.affectedByGravity = false
+                },
+                SKAction.wait(forDuration: 3.0),
+                SKAction.run() {
+                    organ.removeFromParent() // change the image to an explosion of blood instead
+                    let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
+                    let gameOverScene = GameOverScene(size: self.size, score: self.score)
+                    self.view?.presentScene(gameOverScene, transition: reveal)
+                }
             ]))
-        
+        }
     }
     
     func touchDown(atPoint pos : CGPoint) {
@@ -206,6 +251,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: CFTimeInterval) {
         if gameOngoing {
+            /*
             nodesToRemove = self.nodes(at: deleteLocation)
             if nodesToRemove.count > 0 {
                 for node in nodesToRemove {
@@ -217,6 +263,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     }
                 }
             }
+            */
             // Called before each frame is rendered
             if isFingerOnOrgan {
                 if gravityOn
