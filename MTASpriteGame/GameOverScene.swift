@@ -8,6 +8,7 @@
 
 import Foundation
 import SpriteKit
+import GameplayKit
 
 class GameOverScene: SKScene {
     
@@ -34,11 +35,26 @@ class GameOverScene: SKScene {
         label2.position = CGPoint(x: size.width/2, y: size.height/2-20)
         addChild(label2)
         
+        let playAgainMessage = "tap to play again"
+        
+        let label3 = SKLabelNode(fontNamed: "Chalkduster")
+        label3.text = playAgainMessage
+        label3.fontSize = 15
+        label3.fontColor = SKColor.black
+        label3.position = CGPoint(x: size.width/2, y: 35)
+        addChild(label3)
+        
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        restart()
+    }
+    
+    func restart() {
         run(SKAction.sequence([
-            SKAction.wait(forDuration: 3.0),
             SKAction.run() {
                 let reveal = SKTransition.doorsOpenHorizontal(withDuration: 0.75)
-                let scene = GameScene(size: size)
+                let scene = GameScene(size: self.size)
                 self.view?.presentScene(scene, transition: reveal)
             }
         ]))

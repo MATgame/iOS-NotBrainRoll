@@ -50,10 +50,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         
         physicsWorld.contactDelegate = self
-        let borderBody = SKPhysicsBody(edgeLoopFrom: CGRect(x: -100, y: 0, width: size.width+150, height: size.height+150))
+        let borderBody = SKPhysicsBody(edgeLoopFrom: CGRect(x: -100, y: 0, width: size.width+100, height: size.height+250))
         borderBody.categoryBitMask = PhysicsCategory.Edge
         borderBody.contactTestBitMask = PhysicsCategory.Organ
-        //borderBody.collisionBitMask = PhysicsCategory.None
+        borderBody.collisionBitMask = PhysicsCategory.None
         self.physicsBody = borderBody
         self.physicsBody?.friction = 0.3
         
@@ -67,7 +67,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             newOrgan.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(radius))
             newOrgan.physicsBody?.categoryBitMask = PhysicsCategory.Organ
             newOrgan.physicsBody?.contactTestBitMask = PhysicsCategory.Edge
-            //newOrgan.physicsBody?.collisionBitMask = PhysicsCategory.None
+            newOrgan.physicsBody?.collisionBitMask = PhysicsCategory.None
             newOrgan.physicsBody?.usesPreciseCollisionDetection = true
             newOrgan.physicsBody?.friction = 0.05
             newOrgan.physicsBody?.angularDamping = 0.3
@@ -84,7 +84,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         let sequence = SKAction.sequence([wait, spawn])
-        self.run(SKAction.repeatForever(sequence))
+        self.run(SKAction.repeatForever(sequence), withKey: "spawnOrgans")
     }
     
     func didBegin(_ contact: SKPhysicsContact)
@@ -109,16 +109,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func killOrgan(organ: SKSpriteNode) {
-        print("organ-edge contact")
-        organ.removeFromParent() // change the image to an explosion of blood instead
-        
         //end current game - show score/ restart button
-        let gameOverAction = SKAction.run() {
-            let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
-            let gameOverScene = GameOverScene(size: self.size, score: self.score)
-            self.view?.presentScene(gameOverScene, transition: reveal)
-        }
-        run(gameOverAction)
+        run(SKAction.sequence([
+            SKAction.run() {
+                print("organ-edge contact")
+                self.removeAction(forKey: "spawnOrgans")
+                organ.texture = SKTexture(imageNamed: "blood")
+                organ.size = CGSize(width: 200, height: 200)
+                organ.removeAction(forKey: "rotateOrgan")
+                organ.physicsBody?.angularVelocity = 0
+                organ.physicsBody?.allowsRotation = false
+                organ.zRotation = 0
+                organ.physicsBody?.velocity = CGVector.zero
+                organ.physicsBody?.affectedByGravity = false
+            },
+            SKAction.wait(forDuration: 3.0),
+            SKAction.run() {
+                organ.removeFromParent() // change the image to an explosion of blood instead
+                let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
+                let gameOverScene = GameOverScene(size: self.size, score: self.score)
+                self.view?.presentScene(gameOverScene, transition: reveal)
+            }
+            ]))
+        
     }
     
     func touchDown(atPoint pos : CGPoint) {
