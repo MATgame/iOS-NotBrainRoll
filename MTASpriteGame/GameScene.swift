@@ -136,13 +136,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     organ.zPosition = 1
                     organ.physicsBody?.affectedByGravity = false
                     organ.physicsBody?.angularDamping = 0
-                    organ.physicsBody?.velocity = CGVector(dx: 150, dy: 0)
-                    possibleHand.physicsBody?.velocity = CGVector(dx: 150, dy: 0)
+                    organ.physicsBody?.velocity = CGVector(dx: 400, dy: 0)
+                    possibleHand.physicsBody?.velocity = CGVector(dx: 400, dy: 0)
                     self.score += 1
                     print("score: " + String(self.score))
                     self.scoreLabel.text = String(self.score)
                 },
-                SKAction.wait(forDuration: 0.75),
+                SKAction.wait(forDuration: 0.375),
+                SKAction.run() {
+                    possibleHand.physicsBody?.velocity = CGVector.zero
+                    possibleHand.physicsBody?.velocity = CGVector(dx: -400, dy: 0)
+                },
+                SKAction.wait(forDuration: 0.375),
                 SKAction.run() {
                     organ.removeFromParent() // change the image to an explosion of blood instead
                     possibleHand.physicsBody?.velocity = CGVector.zero
@@ -171,7 +176,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     organ.physicsBody?.velocity = CGVector.zero
                     organ.physicsBody?.affectedByGravity = false
                 },
-                SKAction.wait(forDuration: 3.0),
+                SKAction.wait(forDuration: 2.0),
                 SKAction.run() {
                     organ.removeFromParent() // change the image to an explosion of blood instead
                     let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
