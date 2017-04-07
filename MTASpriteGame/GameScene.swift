@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
@@ -30,20 +31,40 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var touchedOrgans = [SKNode]()
     var score = Int()
     var numOrgans = Int()
-    var gravityOn = true
     //545, 312   501.564, 289.835 132.871, 60.331
     let deleteLocation = CGPoint(x: 545, y: 312)
     var nodesToRemove = [SKNode]()
     var scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    let bg = SKSpriteNode(imageNamed: "bg")
     let hand = SKSpriteNode(imageNamed: "hands")
+    var organTouchPlayer = AVAudioPlayer()
+    var organDiePlayer = AVAudioPlayer()
+    var organTouchSound = NSURL(fileURLWithPath: Bundle.main.path(forResource: "organTouch", ofType: "wav")!)
+    var organDieSound = NSURL(fileURLWithPath: Bundle.main.path(forResource: "organDie", ofType: "wav")!)
+    var organTouchTempo: Float!
+    var organTouchVolume: Float!
+    var positionToCompare: Int = 1
+    var initTouchLocation = CGPoint()
+    
     
     override func didMove(to view: SKView) {
         scoreLabel.text = String(score)
         scoreLabel.fontSize = 30
-        scoreLabel.fontColor = SKColor.white
+        scoreLabel.fontColor = SKColor.red
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height-30)
         scoreLabel.zPosition = 1
         addChild(scoreLabel)
+        
+        bg.name = "background"
+        bg.position = CGPoint(x: size.width/2, y: size.height/2)
+        bg.zPosition = -3
+        bg.size = CGSize(width: size.width, height: size.height)
+        bg.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 132.871, height: 60.331))
+        bg.physicsBody?.categoryBitMask = PhysicsCategory.None
+        bg.physicsBody?.contactTestBitMask = PhysicsCategory.None
+        bg.physicsBody?.collisionBitMask = PhysicsCategory.None
+        bg.physicsBody?.affectedByGravity = false
+        addChild(bg)
         
         hand.name = "Hand"
         hand.position = CGPoint(x: 501.564, y: 289.835)
@@ -58,7 +79,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         
         physicsWorld.contactDelegate = self
-        let borderBody = SKPhysicsBody(edgeLoopFrom: CGRect(x: -100, y: 0, width: size.width+100, height: size.height+250))
+        let borderBody = SKPhysicsBody(edgeLoopFrom: CGRect(x: -100, y: 0, width: size.width+400, height: size.height+450))
         borderBody.categoryBitMask = PhysicsCategory.Edge
         borderBody.contactTestBitMask = PhysicsCategory.Organ
         borderBody.collisionBitMask = PhysicsCategory.None
@@ -89,6 +110,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             self.addChild(newOrgan)
             
+        }
+        
+        do {
+            try organTouchPlayer = AVAudioPlayer(contentsOf: organTouchSound as URL, fileTypeHint: "wav")
+            organTouchPlayer.enableRate = true
+            organTouchTempo = organTouchPlayer.rate
+            organTouchVolume = organTouchPlayer.volume
+            organTouchPlayer.prepareToPlay()
+        } catch {
+            print("error in preparing organ touched sound")
+        }
+        
+        do {
+            try organDiePlayer = AVAudioPlayer(contentsOf: organDieSound as URL, fileTypeHint: "wav")
+            organDiePlayer.volume = organDiePlayer.volume / 3.5
+            organTouchPlayer.prepareToPlay()
+        } catch {
+            print("error in preparing organ death sound")
         }
         
         let sequence = SKAction.sequence([wait, spawn])
@@ -128,6 +167,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func saveOrgan(possibleHand: SKSpriteNode, organ: SKSpriteNode) {
         
         if possibleHand.name == "Hand", organ.name == "Organ" {
+            organTouchPlayer.rate = organTouchTempo / 2
+            organTouchPlayer.volume = organTouchVolume * 3.5
+            organTouchPlayer.play()
             isFingerOnOrgan = false
             organ.name = "DeliveredOrgan"
             run(SKAction.sequence([
@@ -160,8 +202,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func killOrgan(organ: SKSpriteNode) {
         if organ.name == "Organ" {
+            organDiePlayer.play()
             isFingerOnOrgan = false
             gameOngoing = false
+            self.spawnPieces(organ: organ)
             //end current game - show score/ restart button
             run(SKAction.sequence([
                 SKAction.run() {
@@ -176,15 +220,66 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     organ.physicsBody?.velocity = CGVector.zero
                     organ.physicsBody?.affectedByGravity = false
                 },
-                SKAction.wait(forDuration: 2.0),
+                SKAction.wait(forDuration: 0.15),
+                SKAction.run() {
+                    organ.texture = SKTexture(imageNamed: "blood2")
+                    organ.size = CGSize(width: 200, height: 200)
+                },
+                SKAction.wait(forDuration: 1.85),
                 SKAction.run() {
                     organ.removeFromParent() // change the image to an explosion of blood instead
-                    let reveal = SKTransition.doorsCloseHorizontal(withDuration: 0.75)
+                    let reveal = SKTransition.fade(with: UIColor.red, duration: 0.75)
                     let gameOverScene = GameOverScene(size: self.size, score: self.score)
                     self.view?.presentScene(gameOverScene, transition: reveal)
                 }
             ]))
         }
+    }
+    
+    func spawnPieces(organ: SKSpriteNode) {
+        
+        let piece1 = SKSpriteNode(imageNamed: "p1")
+        piece1.name = "Piece"
+        piece1.position = organ.position
+        piece1.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(15))
+        piece1.physicsBody?.categoryBitMask = PhysicsCategory.Organ
+        piece1.physicsBody?.contactTestBitMask = PhysicsCategory.Edge | PhysicsCategory.Hand
+        piece1.physicsBody?.collisionBitMask = PhysicsCategory.Edge
+        piece1.physicsBody?.friction = 0.05
+        piece1.physicsBody?.angularDamping = 0.3
+        piece1.physicsBody?.restitution = 0.2
+        piece1.physicsBody?.velocity = CGVector(dx: 250, dy: 350)
+        piece1.physicsBody?.affectedByGravity = true
+        
+        let piece2 = SKSpriteNode(imageNamed: "p2")
+        piece2.name = "Piece"
+        piece2.position = organ.position
+        piece2.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(12))
+        piece2.physicsBody?.categoryBitMask = PhysicsCategory.Organ
+        piece2.physicsBody?.contactTestBitMask = PhysicsCategory.Edge | PhysicsCategory.Hand
+        piece2.physicsBody?.collisionBitMask = PhysicsCategory.Edge
+        piece2.physicsBody?.friction = 0.05
+        piece2.physicsBody?.angularDamping = 0.3
+        piece2.physicsBody?.restitution = 0.2
+        piece2.physicsBody?.velocity = CGVector(dx: 150, dy: 300)
+        piece2.physicsBody?.affectedByGravity = true
+        
+        let piece3 = SKSpriteNode(imageNamed: "p3")
+        piece3.name = "Piece"
+        piece3.position = organ.position
+        piece3.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(8))
+        piece3.physicsBody?.categoryBitMask = PhysicsCategory.Organ
+        piece3.physicsBody?.contactTestBitMask = PhysicsCategory.Edge | PhysicsCategory.Hand
+        piece3.physicsBody?.collisionBitMask = PhysicsCategory.Edge
+        piece3.physicsBody?.friction = 0.05
+        piece3.physicsBody?.angularDamping = 0.3
+        piece3.physicsBody?.restitution = 0.2
+        piece3.physicsBody?.velocity = CGVector(dx: -100, dy: 450)
+        piece3.physicsBody?.affectedByGravity = true
+        
+        addChild(piece1)
+        addChild(piece2)
+        addChild(piece3)
     }
     
     func touchDown(atPoint pos : CGPoint) {
@@ -198,29 +293,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if gameOngoing {
-            let touch = touches.first
-            touchLocation = touch!.location(in:self)
-            touchedOrgans = self.nodes(at: touchLocation)
-            if touchedOrgans.count > 0 {
-                numOrgans = touchedOrgans.count
-                if touchedOrgans[numOrgans - 1].name == "background" {
-                    print(touchedOrgans.popLast()?.name ?? "none")
+            if !isFingerOnOrgan {
+                let touch = touches.first
+                touchLocation = touch!.location(in:self)
+                touchedOrgans = self.nodes(at: touchLocation)
+                if touchedOrgans.count > 0 {
+                    numOrgans = touchedOrgans.count
+                    if touchedOrgans[numOrgans - 1].name == "background" {
+                        print(touchedOrgans.popLast()?.name ?? "none")
+                    }
+                }
+                if touchedOrgans.count > 0 {
+                    numOrgans = touchedOrgans.count
+                    if touchedOrgans[numOrgans - 1].name == "hand" {
+                        print(touchedOrgans.popLast()?.name ?? "none")
+                    }
+                }
+                if touchedOrgans.count > 0 {
+                    organTouchPlayer.rate = organTouchTempo / 1.5
+                    organTouchPlayer.volume = organTouchVolume
+                    organTouchPlayer.play()
+                    numOrgans = touchedOrgans.count
+                    if touchedOrgans[numOrgans - 1].name == "Organ" {
+                        isFingerOnOrgan = true
+                        touchedOrgans[numOrgans-1].removeAction(forKey: "rotateOrgan")
+                    }
                 }
             }
-            if touchedOrgans.count > 0 {
-                numOrgans = touchedOrgans.count
-                if touchedOrgans[numOrgans - 1].name == "hand" {
-                    print(touchedOrgans.popLast()?.name ?? "none")
-                }
-            }
-            if touchedOrgans.count > 0 {
-                numOrgans = touchedOrgans.count
-                if touchedOrgans[numOrgans - 1].name == "Organ" {
-                    isFingerOnOrgan = true
-                    touchedOrgans[numOrgans-1].removeAction(forKey: "rotateOrgan")
-                }
-            }
-        
             /*if let body = physicsWorld.body(at: touchLocation) {
                 if body.node!.name == "organ" {
                     print("Began touch on organ")
@@ -241,6 +340,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         if isFingerOnOrgan && gameOngoing {
             isFingerOnOrgan = false
+            
+            let dt:CGFloat = 3.6/50
+            let distance = CGVector(dx: touches.first!.location(in: self).x - initTouchLocation.x, dy: touches.first!.location(in: self).y - initTouchLocation.y)
+            let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
+            
+            touchedOrgans[numOrgans - 1].physicsBody?.velocity = velocity
+            
             touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = true
         }
         /*for organ in touchedOrgans {
@@ -271,25 +377,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             */
             // Called before each frame is rendered
             if isFingerOnOrgan {
-                if gravityOn
-                {
-                    touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = false
-                    touchedOrgans[numOrgans - 1].physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-                    gravityOn = false
-                    /*for organ in touchedOrgans {
-                        organ.physicsBody?.affectedByGravity = false
-                    }*/
-                    //childNode(withName: "organ")!.physicsBody?.affectedByGravity = false
-                    //childNode(withName: "organ")!.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-                }
-                let dt:CGFloat = 3.6/60.0
-                let distance = CGVector(dx: touchLocation.x-touchedOrgans[numOrgans-1].position.x, dy: touchLocation.y-touchedOrgans[numOrgans-1].position.y)
-                let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
-            
+                touchedOrgans[numOrgans - 1].physicsBody?.affectedByGravity = false
+                touchedOrgans[numOrgans - 1].physicsBody?.velocity = CGVector(dx: 0, dy: 0)
                 touchedOrgans[numOrgans - 1].position = CGPoint(x: touchLocation.x, y: touchLocation.y)
-            
-                touchedOrgans[numOrgans - 1].physicsBody?.velocity = velocity
-            
+                
+                if positionToCompare == 2
+                {
+                    positionToCompare = 1
+                }
+                if positionToCompare == 1
+                {
+                    initTouchLocation = touchLocation
+                    positionToCompare = positionToCompare + 1
+                }
                 /*for organ in touchedOrgans {
                     organ.position = CGPoint(x: touchLocation.x, y: touchLocation.y)
                 }*/

@@ -15,6 +15,8 @@
 		FB12B9EE1E4E36F400637A20 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9EC1E4E36F400637A20 /* Main.storyboard */; };
 		FB12B9F01E4E36F400637A20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9EF1E4E36F400637A20 /* Assets.xcassets */; };
 		FB12B9F31E4E36F400637A20 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB12B9F11E4E36F400637A20 /* LaunchScreen.storyboard */; };
+		FB1BDA301E97FA5900047699 /* organDie.wav in Resources */ = {isa = PBXBuildFile; fileRef = FB1BDA2F1E97FA5900047699 /* organDie.wav */; };
+		FB1BDA321E97FA5D00047699 /* organTouch.wav in Resources */ = {isa = PBXBuildFile; fileRef = FB1BDA311E97FA5D00047699 /* organTouch.wav */; };
 		FB71576E1E6A295200B69407 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB71576D1E6A295200B69407 /* GameOverScene.swift */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +31,8 @@
 		FB12B9EF1E4E36F400637A20 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FB12B9F21E4E36F400637A20 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FB12B9F41E4E36F400637A20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FB1BDA2F1E97FA5900047699 /* organDie.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = organDie.wav; sourceTree = "<group>"; };
+		FB1BDA311E97FA5D00047699 /* organTouch.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = organTouch.wav; sourceTree = "<group>"; };
 		FB71576D1E6A295200B69407 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,6 +75,8 @@
 				FB12B9EC1E4E36F400637A20 /* Main.storyboard */,
 				FB12B9EF1E4E36F400637A20 /* Assets.xcassets */,
 				FB12B9F11E4E36F400637A20 /* LaunchScreen.storyboard */,
+				FB1BDA2F1E97FA5900047699 /* organDie.wav */,
+				FB1BDA311E97FA5D00047699 /* organTouch.wav */,
 				FB12B9F41E4E36F400637A20 /* Info.plist */,
 			);
 			name = MATSpriteGame;
@@ -109,7 +115,7 @@
 				TargetAttributes = {
 					FB12B9DE1E4E36F400637A20 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = N6RP3H788Z;
+						DevelopmentTeam = 54GBE4JZ85;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -140,7 +146,9 @@
 				FB12B9EE1E4E36F400637A20 /* Main.storyboard in Resources */,
 				FB12B9E51E4E36F400637A20 /* GameScene.sks in Resources */,
 				FB12B9F01E4E36F400637A20 /* Assets.xcassets in Resources */,
+				FB1BDA301E97FA5900047699 /* organDie.wav in Resources */,
 				FB12B9F31E4E36F400637A20 /* LaunchScreen.storyboard in Resources */,
+				FB1BDA321E97FA5D00047699 /* organTouch.wav in Resources */,
 				FB12B9E71E4E36F400637A20 /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -280,7 +288,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = N6RP3H788Z;
+				DEVELOPMENT_TEAM = 54GBE4JZ85;
 				INFOPLIST_FILE = MTASpriteGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = MTA.MTASpriteGame;
@@ -295,7 +303,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = N6RP3H788Z;
+				DEVELOPMENT_TEAM = 54GBE4JZ85;
 				INFOPLIST_FILE = MTASpriteGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = MTA.MTASpriteGame;
