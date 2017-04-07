@@ -109,7 +109,7 @@
 				TargetAttributes = {
 					FB12B9DE1E4E36F400637A20 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = 54GBE4JZ85;
+						DevelopmentTeam = N6RP3H788Z;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -280,7 +280,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 54GBE4JZ85;
+				DEVELOPMENT_TEAM = N6RP3H788Z;
 				INFOPLIST_FILE = MTASpriteGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = MTA.MTASpriteGame;
@@ -295,7 +295,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 54GBE4JZ85;
+				DEVELOPMENT_TEAM = N6RP3H788Z;
 				INFOPLIST_FILE = MTASpriteGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = MTA.MTASpriteGame;
